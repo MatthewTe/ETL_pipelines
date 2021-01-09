@@ -5,7 +5,7 @@ import bonobo
 import sqlite3
 
 # Importing the Base Pipeline API Object:
-from ETL_pipelines.base_pipeline import Pipeline
+import ETL_pipelines
 
 class OHLCPipeline(Pipeline):
     """An object that wraps all the logic necessary to create
