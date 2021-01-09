@@ -17,9 +17,9 @@ class OHLCPipeline(Pipeline):
     and pipeline execution methods to be inherited.
 
     Example:
-        OHLCPipeline('database url/database path')
-        OHLCPipeline.read_ticker_lst('example_tickers.txt')
-        OHLCPipeline.execute_pipeline()
+        example_pipeline = OHLCPipeline('database url/database path')
+        example_pipeline.read_ticker_lst('example_tickers.txt')
+        example_pipeline.execute_pipeline()
 
     Arguments:
         dbpath (str): The relative or absoloute database URL pointing to
