@@ -61,6 +61,11 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Files for 'napkin' testing:
+*.sqlite
+*.sqlite3
+example.txt
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -127,3 +132,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# vscode folders:
+.vscode/
