@@ -132,6 +132,11 @@ class OHLCPipeline():
         """Method that executes the bonobo graph and performs all of logic described in the
         ETL pipeline.
 
+        Example:
+            OHLCPipeline('database url/database path')
+            OHLCPipeline.read_ticker_lst('example_tickers.txt')
+            OHLCPipeline.execute_pipeline()
+
         """
         self.bonobo_parser = bonobo.get_argument_parser()
         with bonobo.parse_args(self.bonobo_parser) as options:
