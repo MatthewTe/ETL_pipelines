@@ -5,7 +5,7 @@ import bonobo
 import sqlite3
 
 # Importing the Base Pipeline API Object:
-import base_pipeline
+from ETL_pipelines.base_pipeline import Pipeline
 
 class OHLCPipeline(Pipeline):
     """An object that wraps all the logic necessary to create
@@ -28,7 +28,7 @@ class OHLCPipeline(Pipeline):
     def __init__(self, dbpath):
 
         # Initalizing the parent method:
-        super(Pipeline, self).__init__(dbpath)
+        super(OHLCPipeline, self).__init__(dbpath)
 
         # Declaring instance params:
         self.ticker_lst = []
@@ -121,13 +121,3 @@ class OHLCPipeline(Pipeline):
 
         # Writing price data to the database:
         price_df.to_sql(ticker, self._con, if_exists='replace')
-
-
-# Example:
-OHLCPipeline("test.sqlite")
-OHLCPipeline.read_ticker_lst('example.txt')
-OHLCPipeline.execute_pipeline()
-
-con = sqlite3.connect('test.sqlite')
-test = pd.read_sql_query('SELECT * FROM SPY', con)
-print(test)
