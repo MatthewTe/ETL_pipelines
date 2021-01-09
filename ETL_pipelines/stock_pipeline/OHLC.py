@@ -4,20 +4,34 @@ import yfinance as yf
 import bonobo
 import sqlite3
 
+# Importing the Base Pipeline API Object:
+from ETL_pipelines.base_pipeline import Pipeline
 
-class OHLCPipeline():
+class OHLCPipeline(Pipeline):
     """An object that wraps all the logic necessary to create
     a simple ETL pipeline for stock prices extracted from Yahoo
     Finance.
 
+    It inherits from the Pipeline API object with allows the extract,
+    transform and load methods to be overwritten but the graph creation
+    and pipeline execution methods to be inherited.
+
+    Example:
+        OHLCPipeline('database url/database path')
+        OHLCPipeline.read_ticker_lst('example_tickers.txt')
+        OHLCPipeline.execute_pipeline()
+
     Arguments:
         dbpath (str): The relative or absoloute database URL pointing to
-            the database where stock price data should be written.ß
+            the database where stock price data should be written.
     """
     def __init__(self, dbpath):
+
+        # Initalizing the parent method:
+        super(Pipeline, self).__init__(dbpath)
+
         # Declaring instance params:
         self.ticker_lst = []
-        self.dbpath = dbpath
     
     def read_ticker_lst(self, file_path):
         """The method that opens the file containing ticker
@@ -45,7 +59,7 @@ class OHLCPipeline():
         ticker_file.close()
     
     # <-----------Bonobo ETL Methods----------->
-    def extract_stock_prices(self):
+    def extract(self):
         """Method initalizes the yfinance ticker object to download
         all of the price history data for each ticker in the ticker_lst
         param.
@@ -74,7 +88,7 @@ class OHLCPipeline():
         for ticker in self.ticker_lst:
             yield (ticker, stock_price_data[ticker])
     
-    def transform_stock_data(self, *args):
+    def transform(self, *args):
         """Method that ingests the dataframe from the 
         `extract_stock_prices()` method and correctly formats
         data.
@@ -94,7 +108,7 @@ class OHLCPipeline():
 
         yield (ticker, ohlc)
     
-    def load_price_data(self, *args):
+    def load(self, *args):
         """Method that uses the pandas.to_sql method to
         wrtie each OHLC dataframe to a database.
 
@@ -108,38 +122,12 @@ class OHLCPipeline():
         # Writing price data to the database:
         price_df.to_sql(ticker, self._con, if_exists='replace')
 
-   
-    def build_graph(self, **options):
-        """The method that builds the bonobo graph from
-        the extract_stock_prices, transform_stock_data and load_price_data
-        methods
 
-        """
-        # Building the Graph:
-        self.graph = bonobo.Graph()    
-        self.graph.add_chain(
-            self.extract_stock_prices,
-            self.transform_stock_data,
-            self.load_price_data)
+# Example:
+OHLCPipeline("test.sqlite")
+OHLCPipeline.read_ticker_lst('example.txt')
+OHLCPipeline.execute_pipeline()
 
-        return self.graph
-
-    def get_services(self, **options):
-        return {}
-
-    # Executon method:
-    def execute_pipeline(self):
-        """Method that executes the bonobo graph and performs all of logic described in the
-        ETL pipeline.
-
-        Example:
-            OHLCPipeline('database url/database path')
-            OHLCPipeline.read_ticker_lst('example_tickers.txt')
-            OHLCPipeline.execute_pipeline()
-
-        """
-        self.bonobo_parser = bonobo.get_argument_parser()
-        with bonobo.parse_args(self.bonobo_parser) as options:
-            bonobo.run(
-                self.build_graph(**options),
-                services=self.get_services(**options))
+con = sqlite3.connect('test.sqlite')
+test = pd.read_sql_query('SELECT * FROM SPY', con)
+print(test)
