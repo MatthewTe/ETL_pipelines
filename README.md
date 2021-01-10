@@ -7,5 +7,6 @@ The library was designed mainly for specific personal use but is generalizable. 
 
 **Stock Data `ETL_pipelines/stock_pipeline`**:
 ```
-OHLC Yahoo Finance data - OHLC.py
+OHLC Yahoo Finance data - OHLC.py/OHLCPipeline
+Wikipedia S&P 500 Index Composition - market_indicies.py/SPYCompositionPipeline
 ```
