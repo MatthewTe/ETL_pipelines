@@ -232,3 +232,114 @@ class DJIACompositionPipeline(Pipeline):
 
         # Writing data to the database:
         component_df.to_sql("DJIA_components", self._con, if_exists="replace", index=False)  
+
+class SPTSXCompositionPipeline(Pipeline):
+    """A method that contains the logic necessary for constructing
+    an ETL pipeline for a table containing the composition of the S&P/TSX
+    Composite Index from Wikipedia.
+
+    It extends from the Base Parent object Pipeline and overwrites the 
+    extract, transform and load methods.
+
+    Reference:
+        *  https://en.wikipedia.org/wiki/S%26P/TSX_Composite_Index
+    
+    Example:
+        test = SPTSXCompositionPipeline('test.sqlite')
+        test.execute_pipeline()
+
+
+    Arguments:
+        dbpath (str): The relative or absoloute database URL pointing to
+            the database where stock price data should be written.
+
+    """
+    def __init__(self, dbpath):
+        # Initalizing parent method:
+        super(SPTSXCompositionPipeline, self).__init__(dbpath)
+
+        # Hard Coded URL:
+        sptsx_composite_url = "https://en.wikipedia.org/wiki/S%26P/TSX_Composite_Index"   
+
+    def extract(self):
+        pass
+
+    def transform(self, *args):
+        pass 
+
+    def load(self, *args):
+        pass
+
+class FTSECompositionPipeline(Pipeline):
+    """A method that contains the logic necessary for constructing
+    an ETL pipeline for a table containing the composition of the Financial 
+    Times Stock Exchange 100 Index from Wikipedia.
+
+    It extends from the Base Parent object Pipeline and overwrites the 
+    extract, transform and load methods.
+
+    Reference:
+        *  https://en.wikipedia.org/wiki/FTSE_100_Index
+    
+    Example:
+        test = FTSECompositionPipeline('test.sqlite')
+        test.execute_pipeline()
+
+
+    Arguments:
+        dbpath (str): The relative or absoloute database URL pointing to
+            the database where stock price data should be written.
+
+    """
+    def __init__(self, dbpath):
+        # Initalizing parent method:
+        super(FTSECompositionPipeline, self).__init__(dbpath)
+
+        # Hard Coded URL:
+        ftse_market_index_url = "https://en.wikipedia.org/wiki/FTSE_100_Index"   
+
+    def extract(self):
+        pass
+
+    def transform(self, *args):
+        pass 
+
+    def load(self, *args):
+        pass
+
+class SMICompositionPipeline(Pipeline):
+    """A method that contains the logic necessary for constructing
+    an ETL pipeline for a table containing the composition of the Swiss
+    Market Index from Wikipedia.
+
+    It extends from the Base Parent object Pipeline and overwrites the 
+    extract, transform and load methods.
+
+    Reference:
+        *  https://en.wikipedia.org/wiki/Swiss_Market_Index
+    
+    Example:
+        test = SMICompositionPipeline('test.sqlite')
+        test.execute_pipeline()
+
+
+    Arguments:
+        dbpath (str): The relative or absoloute database URL pointing to
+            the database where stock price data should be written.
+
+    """
+    def __init__(self, dbpath):
+        # Initalizing parent method:
+        super(SMICompositionPipeline, self).__init__(dbpath)
+
+        # Hard Coded URL:
+        smi_composition_url = "https://en.wikipedia.org/wiki/Swiss_Market_Index"   
+    
+    def extract(self):
+        pass
+
+    def transform(self, *args):
+        pass 
+
+    def load(self, *args):
+        pass
