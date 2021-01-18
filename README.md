@@ -12,11 +12,20 @@ This library was the result of a conversation with a friend that lead to me atte
 
 **Stock Data `ETL_pipelines/stock_pipeline`**:
 ```
+Pricing Data
+-----------------------------------------------------------------------------------------------------------
 OHLC Yahoo Finance data - OHLC.OHLCPipeline
+
+Composition Data
+-----------------------------------------------------------------------------------------------------------
 Wikipedia S&P 500 Index Composition - market_indicies.SPYCompositionPipeline
 Wikipedia Dow Jones Industrial Average Index Composition - market_indicies.DJIACompositionPipeline
 Wikipedia S&P/TSX Index Composition - market_indicies.SPTSXCompositionPipeline
 Wikipedia FTSE 100 Index Composition - market_indicies.FTSECompositionPipeline
 Wikipedia Swiss Market Index Composition - market_indicies.SMICompositionPipeline
 Wikipedia Swiss Performance Index Composition - market_indicies.SPICompositionPipeline
+
+SEC Filings Data
+-----------------------------------------------------------------------------------------------------------
+SEC EDGAR Filings Content - sec_filings.EDGARFilingsPipeline
 ```

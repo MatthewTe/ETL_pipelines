@@ -112,6 +112,10 @@ class OHLCPipeline(Pipeline):
         """Method that uses the pandas.to_sql method to
         wrtie each OHLC dataframe to a database.
 
+        Arguments:
+            args (tuple): The arguments passed into the load method by the transform method
+                containing the dataframe and its associated ticker symbol. 
+
         """
         # Unpacking argument tuple:
         ticker, price_df = args[0], args[1]
