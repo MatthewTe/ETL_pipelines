@@ -124,4 +124,4 @@ class OHLCPipeline(Pipeline):
         self._con = sqlite3.connect(self.dbpath)
 
         # Writing price data to the database:
-        price_df.to_sql(ticker, self._con, if_exists='replace')
+        price_df.to_sql(f"{ticker}_ohlc", self._con, if_exists='replace')
