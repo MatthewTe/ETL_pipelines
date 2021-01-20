@@ -8,7 +8,9 @@ This library was the result of a conversation with a friend that lead to me atte
 - It was designed with the file system database sqlite in mind. No external Postgres or NOSQL connections.
 - All ETL pipelines are built with the [bonobo](https://github.com/python-bonobo) library, making use of fairly basic scheduled Directed Asyclic Graphs to executre ETL functions.
 
-## The ETL Pipelines that are currently avalible are:
+As I was developing the ETL Pipeline API I also decided to write a VERY basic Query API to make feeding data stored in my sqlite database into other applications. This Query API shamelessly wraps the [Pandas](https://pandas.pydata.org/docs/) database query API, so very little creative credit can go to me for it. It is also developed and expaned upon in a strictly needs-based manner, with simplicity as its core philosophy. Use it (any of it really) at your own risk.
+
+## The ETL Pipeline API that are currently available are:
 
 **Stock Data `ETL_pipelines/stock_pipeline`**:
 ```
@@ -30,3 +32,11 @@ SEC Filings Data
 SEC EDGAR Filings Content - sec_filings.EDGARFilingsPipeline
 ```
     
+## The Query APIs that are currently available
+**Stock Data `Database_API`**:
+```
+Pricing Data
+-----------------------------------------------------------------------------------------------------------
+OHLC Dataframe - stock_api.StockData.get_ohlc_df
+OHLC Backtrader DataFeed - stock_api.StockData.get_ohlc_datafeed
+```
