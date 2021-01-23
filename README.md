@@ -10,7 +10,7 @@ This library was the result of a conversation with a friend that lead to me atte
 
 As I was developing the ETL Pipeline API I also decided to write a VERY basic Query API to make feeding data stored in my sqlite database into other applications. This Query API shamelessly wraps the [Pandas](https://pandas.pydata.org/docs/) database query API, so very little creative credit can go to me for it. It is also developed and expaned upon in a strictly needs-based manner, with simplicity as its core philosophy. Use it (any of it really) at your own risk.
 
-## The ETL Pipeline API that are currently available are:
+## The ETL Pipeline APIs that are currently available are:
 
 **Stock Data `ETL_pipelines/stock_pipeline`**:
 ```

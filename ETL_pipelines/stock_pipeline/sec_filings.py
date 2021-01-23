@@ -282,7 +282,7 @@ class EDGARFilingsPipeline(Pipeline):
             df_index = df.index
 
             # Extracting the index values for rows that are not already in the database and building df: 
-            unique_filing_rows = list(set(database_tbl_index) - set(df_index))
+            unique_filing_rows = list(set(df_index) - set(database_tbl_index))
             df = df.loc[unique_filing_rows]
             
             return df
