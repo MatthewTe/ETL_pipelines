@@ -11,7 +11,32 @@ import praw
 from ETL_pipelines.base_pipeline import Pipeline
 
 class RedditContentPipeline(Pipeline):
-    """
+    """An object that contains all the logic and methods
+    necessary to construct a ETL pipeline for extracting
+    and ingesting daily relevant subreddit posts to a database.
+
+    It inherits from the Pipeline API object with allows the extract,
+    transform and load methods to be overwritten but the graph creation
+    and pipeline execution methods to be inherited.
+
+    The object extracts filings from the "Top" and "Rising" tabs of a subreddit.
+    Each of these Tab's context is extracted by a sperate Extraction method which
+    are then both fed into a transformation method which normalizes the data into 
+    a standard format to be written to the database. 
+    
+    See graphviz plots of the bonobo graph for a structure outline of how data flows.
+    Once again all credit goes to Bonobo and Pandas for the actual heavy lifting.
+
+    Example:
+        test_pipeline = EDGARFilingsPipeline("test.sqlite", "learnpython")
+ 
+     Arguments:
+        dbpath (str): The relative or absoloute database URL pointing to
+            the database where stock price data should be written.
+
+        filings_type (str): The string that indicates the type of SEC
+            EDGAR filings that are extracted by the pipeline. This string
+            is passed into the url string used to make the request.
     """
     def __init__(self, dbpath, subreddit_name, **kwargs):
 
@@ -30,6 +55,9 @@ class RedditContentPipeline(Pipeline):
         self.subreddit = self.reddit.subreddit(self.subreddit_name)
 
         print(f"Reddit Instance Initalized with Read Status:{self.reddit.read_only}")
+
+        # Execuring all of the ETL functions mapped in the graph:
+        self.execute_pipeline()
 
     def extract_rising_posts(self):
         """Method extracts the current rising reddit submissions from a subreddit
@@ -224,7 +252,18 @@ class RedditContentPipeline(Pipeline):
         posts_df.to_sql(f"{self.subreddit_name}_posts", con, if_exists="append", index_label="id")
 
     def build_graph(self, **options):
+        """The method that is used to construct a Bonobo ETL pipeline
+        DAG that schedules the following ETL methods:
 
+        - Extraction: extract_daily_top_posts, extract_rising_posts
+        - Transformation: transform_posts
+        - Loading: load_posts
+
+        Returns: 
+            bonobo.Graph: The Bonobo Graph that is declared as an instance
+                parameter and that will be executed by the self.execute_pipeline method.
+        
+        """
         # Building the Graph:
         self.graph = bonobo.Graph()    
 
@@ -248,4 +287,5 @@ class RedditContentPipeline(Pipeline):
         )
 
         return self.graph
+
 
