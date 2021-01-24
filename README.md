@@ -31,7 +31,14 @@ SEC Filings Data
 -----------------------------------------------------------------------------------------------------------
 SEC EDGAR Filings Content - sec_filings.EDGARFilingsPipeline
 ```
-    
+
+**Social Media Data `ETL_pipelines/social_media_pipeline`**:
+```
+Reddit Data
+-----------------------------------------------------------------------------------------------------------
+Subreddit Daily Rising and Top Posts Content - reddit_submissions.RedditContentPipeline
+```
+
 ## The Query APIs that are currently available
 **Stock Data `Database_API`**:
 ```
