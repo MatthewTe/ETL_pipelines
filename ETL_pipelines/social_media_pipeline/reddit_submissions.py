@@ -287,5 +287,3 @@ class RedditContentPipeline(Pipeline):
         )
 
         return self.graph
-
-
