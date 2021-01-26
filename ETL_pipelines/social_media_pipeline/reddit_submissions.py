@@ -183,7 +183,7 @@ class RedditContentPipeline(Pipeline):
         posts_dict = args[0]
         
         # Querying existing posts from the database during current day:
-        con = sqlite3.connect(self.dbpath, check_same_thread=False)
+        con = sqlite3.connect(self.dbpath)
 
         # TODO: Refine SQL Query to only extract data from database from the current day:
         existing_posts_id = []
@@ -246,7 +246,7 @@ class RedditContentPipeline(Pipeline):
         posts_df = args[0]
 
         # Creating connection to the database:
-        con = sqlite3.connect(self.dbpath, check_same_thread=False)
+        con = sqlite3.connect(self.dbpath)
 
         # Writing the data to the database via pandas API:
         posts_df.to_sql(f"{self.subreddit_name}_posts", con, if_exists="append", index_label="id")
