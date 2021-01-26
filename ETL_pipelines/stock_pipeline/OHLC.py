@@ -121,7 +121,7 @@ class OHLCPipeline(Pipeline):
         ticker, price_df = args[0], args[1]
 
         # Creating sqlite connection here, ensuring con object is in same thread:
-        self._con = sqlite3.connect(self.dbpath, check_same_thread=False)
+        self._con = sqlite3.connect(self.dbpath)
 
         # Writing price data to the database:
         price_df.to_sql(f"{ticker}_ohlc", self._con, if_exists='replace')
