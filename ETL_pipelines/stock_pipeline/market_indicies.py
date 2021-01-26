@@ -229,7 +229,7 @@ class DJIACompositionPipeline(Pipeline):
         component_df = args[0]
 
         # Creating a connection to the database:
-        self._con = sqlite3.connect(self.dbpath)
+        self._con = sqlite3.connect(self.dbpath, check_same_thread=False)
 
         # Writing data to the database:
         component_df.to_sql("DJIA_components", self._con, if_exists="replace", index=False)  
@@ -327,7 +327,7 @@ class SPTSXCompositionPipeline(Pipeline):
         component_df = args[0]
 
         # Creating a connection to the database:
-        self._con = sqlite3.connect(self.dbpath)
+        self._con = sqlite3.connect(self.dbpath, check_same_thread=False)
 
         # Writing data to the database:
         component_df.to_sql("SPTSX_components", self._con, if_exists="replace", index=False)  
@@ -421,7 +421,7 @@ class FTSECompositionPipeline(Pipeline):
         component_df = args[0]
 
         # Creating a connection to the database:
-        self._con = sqlite3.connect(self.dbpath)
+        self._con = sqlite3.connect(self.dbpath, check_same_thread=False)
 
         # Writing data to the database:
         component_df.to_sql("FTSE_components", self._con, if_exists="replace", index=False)  
@@ -515,7 +515,7 @@ class SMICompositionPipeline(Pipeline):
         component_df = args[0]
 
         # Creating a connection to the database:
-        self._con = sqlite3.connect(self.dbpath)
+        self._con = sqlite3.connect(self.dbpath, check_same_thread=False)
 
         # Writing data to the database:
         component_df.to_sql("SMI_components", self._con, if_exists="replace", index=False)  
@@ -609,7 +609,7 @@ class SPICompositionPipeline(Pipeline):
         component_df = args[0]
 
         # Creating a connection to the database:
-        self._con = sqlite3.connect(self.dbpath)
+        self._con = sqlite3.connect(self.dbpath check_same_thread=False)
 
         # Writing data to the database:
         component_df.to_sql("SPI_components", self._con, if_exists="replace", index=False)  

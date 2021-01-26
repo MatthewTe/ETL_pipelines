@@ -72,7 +72,7 @@ class EDGARFilingsPipeline(Pipeline):
                 of filings data from the 'EDGAR Search Results' page. (str, dataframe)
 
         """
-        con = sqlite3.connect(self.dbpath)
+        con = sqlite3.connect(self.dbpath, check_same_thread=False)
         
         # Performing a query to the local database for the CIK:
         SPY_df = pd.read_sql_query("SELECT * FROM SPY_components", con)
@@ -179,7 +179,7 @@ class EDGARFilingsPipeline(Pipeline):
         ticker, filings_df = args[0], args[1]
         
         # Creating SQL Connection:
-        con = sqlite3.connect(self.dbpath)
+        con = sqlite3.connect(self.dbpath, check_same_thread=False)
 
         # Writing the dataframe to the database:
         filings_df.to_sql(f"{ticker}_sec_filings", con, if_exists="append")
@@ -260,7 +260,7 @@ class EDGARFilingsPipeline(Pipeline):
                 
         """
         # Declaring localized connection:
-        con = sqlite3.connect(self.dbpath)
+        con = sqlite3.connect(self.dbpath, check_same_thread=False)
 
         # Querying database for data table:
         tbl_name = f"{ticker}_sec_filings"
