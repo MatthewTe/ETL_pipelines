@@ -76,10 +76,10 @@ class RedditContentPipeline(Pipeline):
                 necessary to compile a dataframe:
 
                 {
-                    id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author],
-                    id2: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author],
+                    id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
+                    id2: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
                                                 ...
-                    idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author]
+                    idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
                 }
 
         """
@@ -97,6 +97,9 @@ class RedditContentPipeline(Pipeline):
                 post.num_comments,
                 post.created_utc,
                 post.stickied,
+                post.over_18,
+                post.spoiler,
+                post.permalink,
                 post.author
             ]
 
@@ -121,10 +124,10 @@ class RedditContentPipeline(Pipeline):
                 necessary to compile a dataframe:
 
                 {
-                    id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author],
-                    id2: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author],
+                    id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
+                    id2: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
                                                 ...
-                    idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author]
+                    idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink ,author],
                 }
 
         """
@@ -142,6 +145,9 @@ class RedditContentPipeline(Pipeline):
                 post.num_comments,
                 post.created_utc,
                 post.stickied,
+                post.over_18,
+                post.spoiler,
+                post.permalink,
                 post.author
             ]
 
@@ -157,8 +163,8 @@ class RedditContentPipeline(Pipeline):
         The dictionary recieved from the extraction methods are in the format:
 
         {
-            id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author],
-            idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, author]
+            id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
+            idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author]
         }
                     
         The transformation method queries the database for existing posts posted on the
@@ -173,11 +179,11 @@ class RedditContentPipeline(Pipeline):
             A DataFrame containing all of the relevant information for each submission in 
                 the format:
 
-                +----------+-------+-------+------------+-----+------------+-----------+--------+------+--------------+----------+-------------------------+--------------+-------------+
-                |id (index)| title |content|upvote_ratio|score|num_comments|created_on|stickied|author|author_is_gold|author_mod|author_has_verified_email|author_created|comment_karma|
-                +----------+-------+-------+------------+-----+------------+----------+--------+------+--------------+----------+-------------------------+--------------+-------------+
-                | string   | string| string|   float    | int |     int    | datetime |  Bool  |  str |      Bool    |  Bool    |           Bool          |      str     |     int     |
-                +----------+-------+-------+------------+-----+------------+----------+--------+------+--------------+----------+-------------------------+--------------+-------------+
+        +----------+-------+-------+------------+-----+------------+----------+--------+-------+-------+---------+------+--------------+----------+-------------------------+--------------+-------------+
+        |id (index)| title |content|upvote_ratio|score|num_comments|created_on|stickied|over_18|spoiler|permalink|author|author_is_gold|author_mod|author_has_verified_email|author_created|comment_karma|
+        +----------+-------+-------+------------+-----+------------+----------+--------+-------+-------+---------+------+--------------+----------+-------------------------+--------------+-------------+
+        | string   | string| string|   float    | int |     int    | datetime |  Bool  | Bool  |  Bool |   str   |  str |      Bool    |  Bool    |           Bool          |      str     |     int     |
+        +----------+-------+-------+------------+-----+------------+----------+--------+-------+-------+---------+------+--------------+----------+-------------------------+--------------+-------------+
         """
         # Unpacking Args Tuple:
         posts_dict = args[0]
@@ -201,24 +207,21 @@ class RedditContentPipeline(Pipeline):
         unique_posts_dict = {
 
             # Unpacking list for faster appending:
-            post_id:[
-                *content_lst,
-                content_lst[-1].is_gold,
-                content_lst[-1].is_mod,
-                content_lst[-1].has_verified_email,
-                content_lst[-1].created_utc,
-                content_lst[-1].comment_karma]
-                 
-            for post_id, content_lst in posts_dict.items() if post_id in unique_id_keys
+            post_id:self._transform_post_content_lst(content_lst) for post_id, content_lst 
+            in posts_dict.items() if post_id in unique_id_keys
+            
             }
-
+        
+        print(unique_posts_dict.items())
+        
         # Converting Dictionary of Unique Post elements to a dataframe:
         posts_df = pd.DataFrame.from_dict(
             unique_posts_dict,
             orient='index',
             columns=[
-                "title", "content", "upvote_ratio", "score", "num_comments", "created_on", "stickied", "author", "author_gold", 
-                "mod_status", "verified_email_status", "acc_created_on", "comment_karma"])
+                "title", "content", "upvote_ratio", "score", "num_comments", "created_on", "stickied", "over_18",
+                "spolier", "permalink", "author", "author_gold", "mod_status", "verified_email_status", "acc_created_on", 
+                "comment_karma"])
 
         # Converting 'author' column data type to string:
         posts_df['author'] = posts_df.author.astype(str)
@@ -232,11 +235,11 @@ class RedditContentPipeline(Pipeline):
         The reddit posts dataframe that is wrtiten to the database is in the following
         format:
         
-        +----------+-------+-------+------------+-----+------------+-----------+--------+------+--------------+----------+-------------------------+--------------+-------------+
-        |id (index)| title |content|upvote_ratio|score|num_comments|created_on|stickied|author|author_is_gold|author_mod|author_has_verified_email|author_created|comment_karma|
-        +----------+-------+-------+------------+-----+------------+----------+--------+------+--------------+----------+-------------------------+--------------+-------------+
-        | string   | string| string|   float    | int |     int    | datetime |  Bool  |  str |      Bool    |  Bool    |           Bool          |      str     |     int     |
-        +----------+-------+-------+------------+-----+------------+----------+--------+------+--------------+----------+-------------------------+--------------+-------------+
+        +----------+-------+-------+------------+-----+------------+----------+--------+-------+-------+---------+------+--------------+----------+-------------------------+--------------+-------------+
+        |id (index)| title |content|upvote_ratio|score|num_comments|created_on|stickied|over_18|spoiler|permalink|author|author_is_gold|author_mod|author_has_verified_email|author_created|comment_karma|
+        +----------+-------+-------+------------+-----+------------+----------+--------+-------+-------+---------+------+--------------+----------+-------------------------+--------------+-------------+
+        | string   | string| string|   float    | int |     int    | datetime |  Bool  | Bool  |  Bool |   str   |  str |      Bool    |  Bool    |           Bool          |      str     |     int     |
+        +----------+-------+-------+------------+-----+------------+----------+--------+-------+-------+---------+------+--------------+----------+-------------------------+--------------+-------------+
         
         Arguments:
             args (tuple): The arguments passed into the load method by the transform method
@@ -287,3 +290,52 @@ class RedditContentPipeline(Pipeline):
         )
 
         return self.graph
+
+    def _transform_post_content_lst(self, lst):
+        """Internal method is used to transform the base list of reddit 
+        post submissions recived from the extraction methods into a full
+        list of params assocaited with the reddit post.
+
+        Method takes a list of base params that is the value associed with
+        each key in the dict ingested from the extraction methods:
+
+        id: [title, content, upvote_ratio, score, num_comments, created_on, stickied,, over_18, spoilers, permalink, author]
+        
+        It then transforms this list to contain additional params by unpacking the 'author'
+        param (a Redditor instance). The list is transformed to contain the folowing parameters
+        in the following order:
+
+        [
+            "title", "content", "upvote_ratio", "score", "num_comments", "created_on", "stickied",
+            "over_18, "spoilers", "permalink", "author", "author_gold", "mod_status", "verified_email_status", 
+            "acc_created_on", "comment_karma"
+        ]
+
+        This method was initally performed by dict comprehension within the main transformation method
+        but was moved into an internal callable method to add error catching logic. This method is 
+        still called within the main dict comprehension:
+
+        Arguments:
+            list (list): A list contaiing all the extracted reddit data in the order described above.
+
+        Returns:
+            list: The transformed list with full feature extraction and error-catching as described 
+                above.
+
+        """
+
+        # TODO: For Gods sake this is the laziest error-catching I have ever written please make this less horrible:
+        try:
+            transformed_lst = [
+                *lst,
+                lst[-1].is_gold,
+                lst[-1].is_mod,
+                lst[-1].has_verified_email,
+                lst[-1].created_utc,
+                lst[-1].comment_karma
+            ]
+        
+        except:
+            transformed_lst = [*lst,"NaN", "NaN", "NaN","NaN","NaN"]
+        
+        return transformed_lst
