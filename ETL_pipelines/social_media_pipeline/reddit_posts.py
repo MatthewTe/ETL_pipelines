@@ -212,7 +212,7 @@ class RedditContentPipeline(Pipeline):
             
             }
         
-        print(unique_posts_dict.items())
+        #print(unique_posts_dict.items())
         
         # Converting Dictionary of Unique Post elements to a dataframe:
         posts_df = pd.DataFrame.from_dict(
