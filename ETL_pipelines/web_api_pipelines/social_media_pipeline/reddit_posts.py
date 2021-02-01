@@ -3,6 +3,7 @@ import pandas as pd
 import sqlite3
 import bonobo
 import os
+import json
 import requests
 
 # Python Reddit API Wrapper:
@@ -14,34 +15,31 @@ from ETL_pipelines.sqlite_pipelines.social_media_pipeline.reddit_posts import Re
 class RedditContentWebAPIPipeline(RedditContentPipeline):
     """An object that contains all the logic and methods
     necessary to construct a ETL pipeline for extracting
-    and ingesting daily relevant subreddit posts to a database.
+    and ingesting daily relevant subreddit posts to a database through
+    the velkozz REST API.
 
-    It inherits from the Pipeline API object with allows the extract,
-    transform and load methods to be overwritten but the graph creation
-    and pipeline execution methods to be inherited.
+    It inherits from the Sqlite RedditContentPipeline object and is modified
+    to perform POST and GET requests to the velkozz Web API through the requests
+    python library.
 
-    The object extracts filings from the "Top" and "Rising" tabs of a subreddit.
-    Each of these Tab's context is extracted by a sperate Extraction method which
-    are then both fed into a transformation method which normalizes the data into 
-    a standard format to be written to the database. 
-    
-    See graphviz plots of the bonobo graph for a structure outline of how data flows.
-    Once again all credit goes to Bonobo and Pandas for the actual heavy lifting.
+    The primary documentation for this pipeline is found in the Sqlite RedditContentPipeline
+    API. This objects adapts the Pipeline object to insert data to a REST Web API
+    in place of a Sqlite database.
 
     Example:
-        test_pipeline = EDGARFilingsPipeline("test.sqlite", "learnpython")
+        test_pipeline = RedditContentWebAPIPipeline("http://localhost:8000/apirscience/", "science")
  
      Arguments:
-        dbpath (str): The relative or absoloute database URL pointing to
-            the database where stock price data should be written.
+        api_endpoint (str): The API endpoint associated with the specific subreddit database table.
+            This is the url endpoint that the requests method uses to Query and Write JSON data to.
 
         subreddit (str): The string that indicates the specific subreddit
             that the data is to be scraped from.
     """
-    def __init__(self, dbpath, subreddit_name, **kwargs):
+    def __init__(self, api_endpoint, subreddit_name, **kwargs):
 
-        # Initalizing the parent Pipeline object:
-        super(RedditContentPipeline, self).__init__(dbpath)
+        # Declaring Instance Parameters:
+        self.api_endpoint = api_endpoint
         self.subreddit_name = subreddit_name
 
         # Creating a reddit praw instance based on specified subreddit:
@@ -59,102 +57,6 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         # Execuring all of the ETL functions mapped in the graph:
         self.execute_pipeline()
 
-    def extract_rising_posts(self):
-        """Method extracts the current rising reddit submissions from a subreddit
-        via the praw API wrapper.
-
-        The generator yields a dictionary containing relevant information extracted
-        from each post generated from the subreddit.rising() praw method. All rising posts
-        are compiled into this dict that is then passed into a data transformation method.
-
-        The data is compiled into a dict for speed as it is then converted into a dataframe
-        in the data transformation method. All seaching and transformation of raw data is done
-        prior to it being converted to a dataframe.
-
-        Yields: Dict
-            A dictionary containing all the relevant information for each reddit post
-                necessary to compile a dataframe:
-
-                {
-                    id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
-                    id2: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
-                                                ...
-                    idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
-                }
-
-        """
-        posts_dict = {}
-
-        # Iterating through the rising posts constructing and generating dicts:
-        for post in self.subreddit.rising():
-
-            # Building the single dict key-value pair:
-            post_content_lst = [
-                post.title,
-                post.selftext,
-                post.upvote_ratio,
-                post.score,
-                post.num_comments,
-                post.created_utc,
-                post.stickied,
-                post.over_18,
-                post.spoiler,
-                post.permalink,
-                post.author
-            ]
-
-            posts_dict[post.id] = post_content_lst
-
-        yield posts_dict
-
-    def extract_daily_top_posts(self):
-        """Method extracts the daily top reddit submissions from a subreddit
-        via the praw API wrapper.
-
-        The generator yields a dictionary containing relevant information extracted
-        from each post generated from the subreddit.top(day) praw method. All top posts
-        are compiled into this dict that is then passed into a data transformation method.
-
-        The data is compiled into a dict for speed as it is then converted into a dataframe
-        in the data transformation method. All seaching and transformation of raw data is done
-        prior to it being converted to a dataframe.
-
-        Yields: Dict
-            A dictionary containing all the relevant information for each reddit post
-                necessary to compile a dataframe:
-
-                {
-                    id1: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
-                    id2: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author],
-                                                ...
-                    idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink ,author],
-                }
-
-        """
-        posts_dict = {}
-
-        # Iterating through the rising posts constructing and generating dicts:
-        for post in self.subreddit.top("day"):
-
-            # Building the single dict key-value pair:
-            post_content_lst = [
-                post.title,
-                post.selftext,
-                post.upvote_ratio,
-                post.score,
-                post.num_comments,
-                post.created_utc,
-                post.stickied,
-                post.over_18,
-                post.spoiler,
-                post.permalink,
-                post.author
-            ]
-
-            posts_dict[post.id] = post_content_lst
-
-        yield posts_dict
-
     def transform_posts(self, *args):
         """The method recieves a length 1 tuple containing a dict of reddit posts generated 
         from the extraction methods and performs transformation on the dict to convert it 
@@ -167,7 +69,7 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
             idn: [title, content, upvote_ratio, score, num_comments, created_on, stickied, over_18, spoiler, permalink, author]
         }
                     
-        The transformation method queries the database for existing posts posted on the
+        The transformation method queries the Web API for existing posts posted on the
         day that the pipeline is executed. It compares the index of the database data 
         and the index of the data recieved from the extraction methods. Only unique
         elements not already in the database are passed into the load method.
@@ -188,19 +90,30 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         # Unpacking Args Tuple:
         posts_dict = args[0]
         
-        # Querying existing posts from the database during current day:
-        con = sqlite3.connect(self.dbpath)
+        # Querying the Web API for all subreddit posts:
+        existing_posts_response = requests.get(self.api_endpoint)
+        print(f"Made Request to the Database for {self.subreddit_name} posts with status code {existing_posts_response.status_code}")
+        
+        # Conditional that ensures correct get request status code:  
+        if existing_posts_response.status_code != 200:
+            raise ValueError(f"Response from Web API Request w/ Status Code {existing_posts_responses.status_code}")
+        
+        # Converting the json response object to a dataframe:
+        existing_posts_json = existing_posts_response.json()
+        existing_posts = pd.DataFrame.from_dict(existing_posts_json)
 
-        # TODO: Refine SQL Query to only extract data from database from the current day:
         existing_posts_id = []
         try:
             existing_posts = pd.read_sql_query(f"SELECT * FROM {self.subreddit_name}_posts", con, index_col="id")
             existing_posts_id = existing_posts.index
         except:
             pass
-
+        
         # Extracting unqiue keys from the posts_dict.keys() that are not present in the existing_post_id:
         unique_id_keys = list(set(posts_dict.keys()) - set(existing_posts_id))
+
+        #print(unique_id_keys)
+        #print(existing_posts_id)
 
         # Unpacking the "Author" parameter and extending Author derived params to the end of the content
         #  list for each dict key-value pair that is unique (not in the database):
@@ -220,17 +133,19 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
             orient='index',
             columns=[
                 "title", "content", "upvote_ratio", "score", "num_comments", "created_on", "stickied", "over_18",
-                "spolier", "permalink", "author", "author_gold", "mod_status", "verified_email_status", "acc_created_on", 
+                "spoiler", "permalink", "author", "author_gold", "mod_status", "verified_email_status", "acc_created_on", 
                 "comment_karma"])
 
-        # Converting 'author' column data type to string:
+        # Formatting the dataframe for final loading:
         posts_df['author'] = posts_df.author.astype(str)
+        posts_df.reset_index(inplace=True)
+        posts_df.rename(columns={'index':'id'}, inplace=True)
 
         yield posts_df
          
     def load_posts(self, *args):
-        """Method writes the reddit posts dataframe into
-        the sqlite database. 
+        """Method writes the reddit posts dataframe into the database
+        through the Web API. 
         
         The reddit posts dataframe that is wrtiten to the database is in the following
         format:
@@ -247,12 +162,13 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         
         """
         posts_df = args[0]
-
-        # Creating connection to the database:
-        con = sqlite3.connect(self.dbpath)
-
-        # Writing the data to the database via pandas API:
-        posts_df.to_sql(f"{self.subreddit_name}_posts", con, if_exists="append", index_label="id")
+        
+        # Converting the dataframe to json format:
+        posts_json = posts_df.to_json(orient="records")
+        parsed_posts = json.loads(posts_json)
+        
+        # Making a POST request to the Web API to write data to the database:
+        post_response = requests.post(self.api_endpoint, json=parsed_posts)
 
     def build_graph(self, **options):
         """The method that is used to construct a Bonobo ETL pipeline
@@ -291,6 +207,16 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
 
         return self.graph
 
+    # Executon method:
+    def execute_pipeline(self):
+        
+        self.bonobo_parser = bonobo.get_argument_parser()
+        with bonobo.parse_args(self.bonobo_parser) as options:
+            bonobo.run(
+                self.build_graph(**options),
+                services=self.get_services(**options))
+    
+    # Internal Data Formatting Method:
     def _transform_post_content_lst(self, lst):
         """Internal method is used to transform the base list of reddit 
         post submissions recived from the extraction methods into a full
