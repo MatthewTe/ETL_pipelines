@@ -3,14 +3,15 @@ import pandas as pd
 import sqlite3
 import bonobo
 import os
+import requests
 
 # Python Reddit API Wrapper:
 import praw
 
-# Importing the Base Pipeline API Object:
-from ETL_pipelines.base_pipeline import Pipeline
+# Importing the Sqlite Reddit Pipeline Object
+from ETL_pipelines.sqlite_pipelines.social_media_pipeline.reddit_posts import RedditContentPipeline
 
-class RedditContentPipeline(Pipeline):
+class RedditContentWebAPIPipeline(RedditContentPipeline):
     """An object that contains all the logic and methods
     necessary to construct a ETL pipeline for extracting
     and ingesting daily relevant subreddit posts to a database.
@@ -34,9 +35,8 @@ class RedditContentPipeline(Pipeline):
         dbpath (str): The relative or absoloute database URL pointing to
             the database where stock price data should be written.
 
-        filings_type (str): The string that indicates the type of SEC
-            EDGAR filings that are extracted by the pipeline. This string
-            is passed into the url string used to make the request.
+        subreddit (str): The string that indicates the specific subreddit
+            that the data is to be scraped from.
     """
     def __init__(self, dbpath, subreddit_name, **kwargs):
 
