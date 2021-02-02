@@ -5,6 +5,8 @@ import bonobo
 import os
 import json
 import requests
+from datetime import datetime, timezone
+from pytz import timezone
 
 # Python Reddit API Wrapper:
 import praw
@@ -101,19 +103,20 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         # Converting the json response object to a dataframe:
         existing_posts_json = existing_posts_response.json()
         existing_posts = pd.DataFrame.from_dict(existing_posts_json)
+        existing_posts.set_index("id", inplace=True)
 
         existing_posts_id = []
         try:
-            existing_posts = pd.read_sql_query(f"SELECT * FROM {self.subreddit_name}_posts", con, index_col="id")
             existing_posts_id = existing_posts.index
         except:
             pass
-        
+            
         # Extracting unqiue keys from the posts_dict.keys() that are not present in the existing_post_id:
         unique_id_keys = list(set(posts_dict.keys()) - set(existing_posts_id))
-
-        #print(unique_id_keys)
-        #print(existing_posts_id)
+        
+        # Logging unique IDs to ensure unique ID logic works as intended:
+        print("UNIQUE ID KEYS:", unique_id_keys)
+        print("EXISTING POST IDs:", existing_posts_id)
 
         # Unpacking the "Author" parameter and extending Author derived params to the end of the content
         #  list for each dict key-value pair that is unique (not in the database):
@@ -137,6 +140,13 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
                 "comment_karma"])
 
         # Formatting the dataframe for final loading:
+        # Converting UTC Time dataframe columns to datetime:
+        posts_df['created_on'] = posts_df['created_on'].apply(
+            lambda x: str(datetime.fromtimestamp(x, tz=timezone("EST"))))
+
+        posts_df['acc_created_on'] = posts_df['acc_created_on'].apply(
+            lambda x: str(datetime.fromtimestamp(x, tz=timezone("EST"))))
+
         posts_df['author'] = posts_df.author.astype(str)
         posts_df.reset_index(inplace=True)
         posts_df.rename(columns={'index':'id'}, inplace=True)
