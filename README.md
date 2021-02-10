@@ -39,11 +39,26 @@ Reddit Data
 Subreddit Daily Rising and Top Posts Content - reddit_submissions.RedditContentPipeline
 ```
 
-## The Query APIs that are currently available
-**Stock Data `Database_API`**:
+## Bonobo Web API Pipelines
+I did say that the Bonobo ETL Pipeline was generalizable and so as my needs evolved, so did the library. I developed a Django REST API service for my other applications, so I decided to write a sub-module for the Pipeline API that perform all of the ETL functions to a Web based REST API instead of a local sqlite database. This either takes the form of inheriting an existing sqlite Pipeline API and replacing the `load`
+portion of the Bonobo graph, or in more complicated instances refactoring the whole Pipeline Object. Refactoring the entire project will take time and at the point that all of the APIs get converted from sqlite pipelines to REST web API pipelines then the README will be changed to incorporate that fact.
+
+## The Web Pipeline APIs that are currently available are:
+** Stock Data `ETL_pipelines/web_api_pipelines/stock_pipeline`
 ```
-Pricing Data
+Composition Data
 -----------------------------------------------------------------------------------------------------------
-OHLC Dataframe - stock_api.StockData.get_ohlc_df
-OHLC Backtrader DataFeed - stock_api.StockData.get_ohlc_datafeed
+Wikipedia S&P 500 Index Composition - market_indicies.SPYCompositionPipeline
+Wikipedia Dow Jones Industrial Average Index Composition - market_indicies.DJIACompositionPipeline
+Wikipedia S&P/TSX Index Composition - market_indicies.SPTSXCompositionPipeline
+Wikipedia FTSE 100 Index Composition - market_indicies.FTSECompositionPipeline
+Wikipedia Swiss Market Index Composition - market_indicies.SMICompositionPipeline
+Wikipedia Swiss Performance Index Composition - market_indicies.SPICompositionPipeline
+
+``` 
+**Social Media Data `ETL_pipelines/web_api_pipelines/social_media_pipeline`**:
+```
+Reddit Data
+-----------------------------------------------------------------------------------------------------------
+Subreddit Daily Rising and Top Posts Content - reddit_submissions.RedditContentPipeline
 ```

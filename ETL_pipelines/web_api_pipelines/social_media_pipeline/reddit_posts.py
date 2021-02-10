@@ -277,4 +277,3 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
             transformed_lst = [*lst,"NaN", "NaN", "NaN","NaN","NaN"]
         
         return transformed_lst
-
