@@ -1,7 +1,49 @@
 "Script containing the Base framework for the Pipeline API"
 
-# Importing External Pipeline Library:
+# Importing External Packages:
 import bonobo
+import requests
+import pandas as pd
+import json
+
+def web_api_json_load(df, url, **kwargs):
+    """The method that converts a pandas dataframe to
+    a list of json objects and writes json to an online database.
+
+    The method is meant to load data into an online database through
+    A REST API. The method seralizes the dataframe into a json format
+    and sends the data to a web API through a HTTP POST request via
+    the requests module.
+
+    If additional authentication is necessary such as an API key it
+    can be passed into the method through the **kwargs argument. 
+
+    Arguments:
+        df (pandas.DataFrame): The dataframe containing the data to be
+            seralized into a json format.
+
+        url (str): The api end point that will be used to form the
+            HTTP POST request to the web api.
+
+    """
+    # Converting dataframe into a json object based on each record:
+    df_json = df.to_json(orient="records")
+    
+    # Creating dicts to configure request:
+    json_payload = json.loads(df_json)
+    headers = {"content-type":"application/json"}
+
+    # Logic for passing API Key to post request:
+    if "API_Key" in kwargs:
+        headers["Authentication"] = f"Token {kwargs["API_Key"]}"
+
+    # Making the Post Request to the Web API:
+    post_response = requests.post(
+        url, 
+        json=json_payload,
+        headers=headers
+        )
+
 
 class Pipeline(object):
     """The Base Object representing an ETL pipeline.

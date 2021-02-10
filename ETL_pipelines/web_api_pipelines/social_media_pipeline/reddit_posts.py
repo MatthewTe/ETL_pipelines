@@ -12,6 +12,7 @@ from pytz import timezone
 import praw
 
 # Importing the Sqlite Reddit Pipeline Object
+from ETL_pipelines.base_pipeline import web_api_json_load
 from ETL_pipelines.sqlite_pipelines.social_media_pipeline.reddit_posts import RedditContentPipeline
 
 class RedditContentWebAPIPipeline(RedditContentPipeline):
@@ -43,6 +44,7 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         # Declaring Instance Parameters:
         self.api_endpoint = api_endpoint
         self.subreddit_name = subreddit_name
+        self.kwargs = kwargs
 
         # Creating a reddit praw instance based on specified subreddit:
         # TODO: Add logic to extract praw config from KWARGS instead of env params.
@@ -173,12 +175,8 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         """
         posts_df = args[0]
         
-        # Converting the dataframe to json format:
-        posts_json = posts_df.to_json(orient="records")
-        parsed_posts = json.loads(posts_json)
-        
-        # Making a POST request to the Web API to write data to the database:
-        post_response = requests.post(self.api_endpoint, json=parsed_posts)
+        # Posting data to the Web API via the generic web api load method:
+        web_api_json_load(posts_df, self.url, API_Key=self.kwargs["API_Key"])
 
     def build_graph(self, **options):
         """The method that is used to construct a Bonobo ETL pipeline
@@ -275,3 +273,5 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
             transformed_lst = [*lst,"NaN", "NaN", "NaN","NaN","NaN"]
         
         return transformed_lst
+
+
