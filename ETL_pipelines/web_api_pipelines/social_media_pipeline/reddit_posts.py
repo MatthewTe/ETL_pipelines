@@ -275,3 +275,11 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         return transformed_lst
 
 
+os.environ["CLIENT_ID"] = "uBreU695t2xgbg"
+os.environ["CLIENT_SECRET"] = "1DIfbu52y-gvyOlndYfJh7hxWuiXrg" 
+os.environ["USER_AGENT"] = "u/KapaSquid WSB WebScraper "
+
+RedditContentWebAPIPipeline(
+    "http://127.0.0.1:8000/social_media_api/reddit/rwallstreetbets/",
+    "wallstreetbets",
+    API_Key="7fc4079b82e138634e30f33bc95bcdd0d689d5c2")

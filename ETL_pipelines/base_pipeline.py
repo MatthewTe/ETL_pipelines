@@ -35,7 +35,8 @@ def web_api_json_load(df, url, **kwargs):
 
     # Logic for passing API Key to post request:
     if "API_Key" in kwargs:
-        headers["Authentication"] = f"Token {kwargs["API_Key"]}"
+        key = kwargs["API_Key"]
+        headers["Authentication"] = f"Token {key}"
 
     # Making the Post Request to the Web API:
     post_response = requests.post(
