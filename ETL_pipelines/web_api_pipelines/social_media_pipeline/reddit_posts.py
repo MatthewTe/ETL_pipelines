@@ -95,17 +95,21 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         posts_dict = args[0]
         
         # Querying the Web API for all subreddit posts:
-        existing_posts_response = requests.get(self.api_endpoint)
+        key = self.kwargs["API_Key"]
+        existing_posts_response = requests.get(self.api_endpoint, headers={"Authorization":f"Token {key}"})
         print(f"Made Request to the Database for {self.subreddit_name} posts with status code {existing_posts_response.status_code}")
-        
+
         # Conditional that ensures correct get request status code:  
         if existing_posts_response.status_code != 200:
             raise ValueError(f"Response from Web API Request w/ Status Code {existing_posts_responses.status_code}")
         
         # Converting the json response object to a dataframe:
         existing_posts_json = existing_posts_response.json()
-        existing_posts = pd.DataFrame.from_dict(existing_posts_json)
-        existing_posts.set_index("id", inplace=True)
+        
+        # If database contains no entry do not attempt to create df:
+        if len(existing_posts_json) > 0:
+            existing_posts = pd.DataFrame.from_dict(existing_posts_json)
+            existing_posts.set_index("id", inplace=True)
 
         existing_posts_id = []
         try:
@@ -176,7 +180,7 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         posts_df = args[0]
         
         # Posting data to the Web API via the generic web api load method:
-        web_api_json_load(posts_df, self.url, API_Key=self.kwargs["API_Key"])
+        web_api_json_load(posts_df, self.api_endpoint, API_Key=self.kwargs["API_Key"])
 
     def build_graph(self, **options):
         """The method that is used to construct a Bonobo ETL pipeline
@@ -274,12 +278,3 @@ class RedditContentWebAPIPipeline(RedditContentPipeline):
         
         return transformed_lst
 
-
-os.environ["CLIENT_ID"] = "uBreU695t2xgbg"
-os.environ["CLIENT_SECRET"] = "1DIfbu52y-gvyOlndYfJh7hxWuiXrg" 
-os.environ["USER_AGENT"] = "u/KapaSquid WSB WebScraper "
-
-RedditContentWebAPIPipeline(
-    "http://127.0.0.1:8000/social_media_api/reddit/rwallstreetbets/",
-    "wallstreetbets",
-    API_Key="7fc4079b82e138634e30f33bc95bcdd0d689d5c2")
